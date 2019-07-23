@@ -138,7 +138,7 @@ namespace BehaviorTree
             List<int> randomList = RandomIndex(childNodes.Count);
             NodeState result = NodeState.Fail;
             Node temp;
-            while (randomList.Count > 0)
+            while (randomList.Count > 1)
             {
                 if (index < 0)
                 {
