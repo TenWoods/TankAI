@@ -179,6 +179,7 @@ namespace TanksMP
 
             //update respawn counter for a future point in time
             SetRespawn();
+            Debug.Log(respawn);
             //if the respawn mechanic is selected, trigger a new coroutine
             if (isServer && respawn)
             {
@@ -224,7 +225,7 @@ namespace TanksMP
             PoolManager.Despawn(obj);
 			NetworkServer.UnSpawn(obj);
  			obj = null;
-
+            Debug.Log(respawn);
             //if it should respawn again, trigger a new coroutine
             if (respawn)
             {
