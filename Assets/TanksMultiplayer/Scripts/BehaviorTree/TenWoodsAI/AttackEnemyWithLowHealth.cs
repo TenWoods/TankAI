@@ -21,7 +21,7 @@ namespace TanksMP
 
         public override NodeState Execute()
         {
-            Debug.Log("AttackLow");
+            Debug.Log("AttackLowHealth");
             FindAllPlayers();
             NodeState result = NodeState.Fail;
             if (target == null)

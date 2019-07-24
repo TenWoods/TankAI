@@ -28,6 +28,7 @@ namespace TanksMP
 
         public override NodeState Execute()
         {
+            Debug.Log("GetItem" + keyword);
             FindAllItems();
             NodeState result = NodeState.Fail;
             if (target == null)
@@ -50,8 +51,18 @@ namespace TanksMP
                 player.MoveTo(target.transform.position);
                 return result;
             }
-            result = NodeState.Success;
-            return result;
+            if (!target.activeInHierarchy)
+            {
+                target = null;
+                result = NodeState.Success;
+                return result;
+            }
+            else
+            {
+                target = null;
+                result = NodeState.Fail;
+                return result;
+            }
         }
         
         /// <summary>

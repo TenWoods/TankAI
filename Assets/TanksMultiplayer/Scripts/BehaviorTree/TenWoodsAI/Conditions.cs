@@ -90,7 +90,7 @@ namespace TanksMP
         {
             FindAllPlayers();
             int lowestHealth = FindLowestHealth();
-            if (player.health <= dangerHealth || player.health < lowestHealth)
+            if (player.health <= dangerHealth)
             {
                 return NodeState.Success;
             }
