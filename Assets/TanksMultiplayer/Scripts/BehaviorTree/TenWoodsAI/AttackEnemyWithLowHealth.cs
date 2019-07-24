@@ -21,6 +21,8 @@ namespace TanksMP
 
         public override NodeState Execute()
         {
+            Debug.Log("AttackLow");
+            FindAllPlayers();
             NodeState result = NodeState.Fail;
             if (target == null)
             {
@@ -30,38 +32,18 @@ namespace TanksMP
                     return result;
                 }
             }
-            if (!target.IsAlive)
+            result = NodeState.Success;
+            player.MoveTo(target.transform.position);
+            if (player.bShootable)
             {
-                target = null;
-                result = NodeState.Success;
-                return result;
+                player.AimAndShoot(target.transform.position);
             }
-            if (Vector3.Magnitude(player.transform.position - target.transform.position) >= 2.0f)
-            {
-                result = NodeState.Running;
-                player.MoveTo(target.transform.position);
-                if (player.bShootable)
-                {
-                    player.AimAndShoot(CalculateAttackDir());
-                }
-                return result;
-            }
-            else
-            {
-                result = NodeState.Running;
-                Vector3 dir = player.transform.position - target.transform.position;
-                Vector3.Normalize(dir);
-                player.SimpleMove(new Vector2(dir.x, dir.z));
-                if (player.bShootable)
-                {
-                    player.AimAndShoot(CalculateAttackDir());
-                }
-                return result;
-            }
+            target = null;
+            return result;
         }
         
         /// <summary>
-        /// 寻找最近的低血量敌人
+        /// 寻找低血量敌人中最近的
         /// </summary>
         /// <returns></returns>
         private bool FindLowHealthPlayer()
@@ -98,16 +80,33 @@ namespace TanksMP
 
         private Vector3 CalculateAttackDir()
         {
-            Vector3 result = new Vector3();
+            Vector3 result;
             Vector3 targetPos = target.transform.position;
             Vector3 playerPos = player.transform.position;
-            float t = Vector3.Magnitude(targetPos - playerPos) / 18.0f;
-            result = targetPos + t * target.agent.velocity;
+            float cosTheta = Mathf.Cos(Mathf.Deg2Rad * Vector3.Angle(player.Velocity, target.Velocity));
+            Vector3 direction = targetPos - playerPos;
+            float distance = direction.magnitude;
+            float a = 1.0f - Mathf.Pow((18.0f / 8.0f), 2);
+            float b = -2.0f * distance * cosTheta;
+            float c = distance * distance;
+            float delta = b * b - 4.0f * a * c;
+            if (delta < 0)
+            {   
+                result = target.transform.position;
+            }
+            else
+            {
+                float sqrtDelta = Mathf.Sqrt(delta);
+                float x1 = (-b + sqrtDelta) / (2.0f * a);
+                float x2 = (-b - sqrtDelta) / (2.0f * a);
+                float x = Mathf.Min(x1, x2);
+                result = targetPos + Vector3.Normalize(target.Velocity) * x;
+            }
             return result;
         }
 
         // 找到除自己之外所有的玩家
-        public void FindAllPlayers()
+        private void FindAllPlayers()
         {
             allPlayers.Clear();
             GameObject[] players = GameObject.FindGameObjectsWithTag("Player");

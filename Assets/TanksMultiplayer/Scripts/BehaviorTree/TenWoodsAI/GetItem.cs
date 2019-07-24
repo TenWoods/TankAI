@@ -28,6 +28,7 @@ namespace TanksMP
 
         public override NodeState Execute()
         {
+            FindAllItems();
             NodeState result = NodeState.Fail;
             if (target == null)
             {
@@ -43,11 +44,10 @@ namespace TanksMP
                 result = NodeState.Fail;
                 return result;
             }
-            if (Vector3.Magnitude(player.transform.position - target.transform.position) >= 0.1f)
+            if (Vector3.Magnitude(player.transform.position - target.transform.position) >= 1.0f)
             {
                 result = NodeState.Running;
                 player.MoveTo(target.transform.position);
-                target = null;
                 return result;
             }
             result = NodeState.Success;
@@ -86,7 +86,7 @@ namespace TanksMP
         /// <summary>
         /// 找到场上所有的加血道具
         /// </summary>
-        public void FindAllItems()
+        private void FindAllItems()
         {
             allItems.Clear();
             GameObject[] items = GameObject.FindGameObjectsWithTag("Powerup");

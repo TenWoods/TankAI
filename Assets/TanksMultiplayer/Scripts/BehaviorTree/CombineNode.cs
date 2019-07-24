@@ -33,6 +33,14 @@ namespace BehaviorTree
     {
         private Node lastRunNode = null;
 
+        public Node LastRunNode
+        {
+            set
+            {
+                lastRunNode = value;
+            }
+        }
+
         public SelectNode() : base(NodeType.Select)
         {
 
@@ -77,6 +85,14 @@ namespace BehaviorTree
     public class SequenceNode : CombineNode
     {
         private Node lastRunNode = null;
+        
+        public Node LastRunNode
+        {
+            set
+            {
+                lastRunNode = value;
+            }
+        }
 
         public SequenceNode() : base(NodeType.Sequence)
         {
@@ -121,6 +137,14 @@ namespace BehaviorTree
     public class RandomSelectNode : CombineNode
     {
         private Node lastRunNode;
+
+        public Node LastRunNode
+        {
+            set
+            {
+                lastRunNode = value;
+            }
+        }
 
         public RandomSelectNode() : base(NodeType.RandomSelect)
         {
@@ -188,6 +212,9 @@ namespace BehaviorTree
         }
     }
 
+    /// <summary>
+    /// 并行节点
+    /// </summary>
     public class ParallelNode : CombineNode
     {
         public ParallelNode() : base(NodeType.Parallel)
@@ -199,6 +226,7 @@ namespace BehaviorTree
         {
             NodeState result = NodeState.Fail;
             int successCount = 0;
+            int failCount = 0;
             Node temp;
             for (int i = 0; i < childNodes.Count; i++)
             {
@@ -206,7 +234,8 @@ namespace BehaviorTree
                 result = temp.Execute();
                 if (result == NodeState.Fail)
                 {
-                    break;
+                    failCount++;
+                    continue;
                 }
                 if (result == NodeState.Success)
                 {
@@ -218,9 +247,13 @@ namespace BehaviorTree
                     continue;
                 }
             }
-            if (result != NodeState.Fail)
+            if (failCount != childNodes.Count)
             {
                 result = successCount >= childNodes.Count ? NodeState.Success : NodeState.Running;
+            }
+            else
+            {
+                result = NodeState.Fail;
             }
             return result;
         }
