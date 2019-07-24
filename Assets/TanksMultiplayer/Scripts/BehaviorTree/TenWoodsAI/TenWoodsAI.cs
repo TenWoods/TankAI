@@ -56,7 +56,7 @@ namespace TanksMP
             base.OnUpdate();
             if (!tankPlayer.IsAlive)
             {
-                rootNode.LastRunNode = null;
+                ClearState();
             }
             NodeState result = rootNode.Execute();
         }
@@ -125,6 +125,15 @@ namespace TanksMP
             parallelNodes[2].AddNode(attackNormals[2]);
 
             rootNode.AddNode(attackLow);
+        }
+
+        private void ClearState()
+        {
+            rootNode.LastRunNode = null;
+            foreach (var node in sequenceNodes)
+            {
+                node.LastRunNode = null;    
+            }
         }
     }
 }

@@ -128,4 +128,55 @@ namespace TanksMP
             }
         }
     }
+
+    public class IsGameHalf : ConditionNode
+    {
+        public override NodeState Execute()
+        {
+            NodeState result = NodeState.Fail;
+            float time = GameManager.GetInstance().GetTimeLeft();
+            if (time <= 150)
+            {
+                result = NodeState.Success;
+            }
+            else
+            {
+                result = NodeState.Fail;
+            }
+            return result;
+        }
+    }
+
+    public class IsAtTop : ConditionNode
+    {
+        private BasePlayer player;
+
+        public IsAtTop(BasePlayer player)
+        {
+            this.player = player;
+        }
+
+        public override NodeState Execute()
+        {
+            int maxScore = 0;
+            int maxIndex = -1;
+            List<int> scores = new List<int>(GameManager.GetInstance().score);
+            for (int i = 0; i < scores.Count; i++)
+            {
+                if (scores[i] > maxScore)
+                {
+                    maxScore = scores[i];
+                    maxIndex = i;
+                }
+            }
+            if (maxIndex == player.teamIndex)
+            {
+                return NodeState.Success;
+            }
+            else
+            {
+                return NodeState.Fail;
+            }
+        }
+    }
 }
