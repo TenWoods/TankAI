@@ -132,6 +132,27 @@ namespace TanksMP
                 return false;
             }
         }
+        /// <summary>
+        /// 当所有人血量一样时
+        /// </summary>
+        /// <returns></returns>
+        private void FindTargetAround()
+        {
+            int index = 0;
+            float minDistance = 10000.0f;
+            float tempDistance = 0;
+            // 寻找范围内血量最少并且没有护盾的
+            for (int i = 0; i < allPlayers.Count; i++)
+            {
+                tempDistance = Vector3.Magnitude(allPlayers[i].transform.position - player.transform.position);
+                if (allPlayers[i].shield <= 0 && tempDistance < minDistance)
+                {
+                    minDistance = tempDistance;
+                    index = i;
+                }
+            }
+            target = allPlayers[index];
+        }
 
         /// <summary>
         /// 计算提前量

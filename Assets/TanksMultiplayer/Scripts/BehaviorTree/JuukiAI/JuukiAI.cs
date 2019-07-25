@@ -44,13 +44,16 @@ namespace TanksMP
         private HasBulletPower hasBullet;
         // 分数最高条件
         private IsAtTop atTop;
+        // 最低分条件
+        private IsLast atLast;
+        // 下位存在条件
         private IsNextAlive nextAlive;
         // 选择节点数量
         private int seletNum = 2;
         // 所有选择节点
         private List<SelectNode> selectNodes;
         // 顺序节点数量
-        private int sequenceNum = 5;
+        private int sequenceNum = 6;
         // 所有顺序节点
         private List<SequenceNode> sequenceNodes;
         // 并行节点数量
@@ -100,6 +103,7 @@ namespace TanksMP
             bulletExtist = new IsItemExist("BulletPower");
             gameHalf = new IsGameHalf();
             atTop = new IsAtTop(tankPlayer);
+            atLast = new IsLast(tankPlayer);
             nextAlive = new IsNextAlive(tankPlayer);
             selectNodes = new List<SelectNode>();
             for (int i = 0; i < seletNum; i++)
@@ -149,15 +153,17 @@ namespace TanksMP
             parallelNodes[2].AddNode(attackNormals[2]);
             sequenceNodes[3].AddNode(gameHalf);
             sequenceNodes[3].AddNode(selectNodes[1]);
-            parallelNodes[3].AddNode(attackLowerScore);
+            parallelNodes[3].AddNode(attackLow);
             parallelNodes[3].AddNode(attackNormals[3]);
             //第四层
             selectNodes[1].AddNode(sequenceNodes[4]);
-            selectNodes[1].AddNode(attackLowerScore);
+            selectNodes[1].AddNode(sequenceNodes[5]);
             //第五层
             sequenceNodes[4].AddNode(atTop);
             sequenceNodes[4].AddNode(nextAlive);
             sequenceNodes[4].AddNode(attackNext);
+            sequenceNodes[5].AddNode(atLast);
+            sequenceNodes[5].AddNode(attackLowerScore);
         }
 
         private void ClearState()

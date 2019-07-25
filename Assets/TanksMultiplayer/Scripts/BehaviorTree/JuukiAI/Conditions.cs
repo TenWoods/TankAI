@@ -155,13 +155,16 @@ namespace TanksMP
         }
     }
 
+    /// <summary>
+    /// 游戏时间过半
+    /// </summary>
     public class IsGameHalf : ConditionNode
     {
         public override NodeState Execute()
         {
             NodeState result = NodeState.Fail;
             float time = GameManager.GetInstance().GetTimeLeft();
-            if (time <= 150)
+            if (time <= 300)
             {
                 result = NodeState.Success;
             }
@@ -173,11 +176,14 @@ namespace TanksMP
         }
     }
 
+    /// <summary>
+    /// 玩家最高分条件
+    /// </summary>
     public class IsAtTop : ConditionNode
     {
         private BasePlayer player;
 
-        public IsAtTop(BasePlayer player)
+        public IsAtTop(BasePlayer player) : base()
         {
             this.player = player;
         }
@@ -206,6 +212,45 @@ namespace TanksMP
         }
     }
 
+    /// <summary>
+    /// 判断玩家是否处于最末尾
+    /// </summary>
+    public class IsLast : ConditionNode
+    {
+        private BasePlayer player;
+
+        public IsLast(BasePlayer player) : base()
+        {
+            this.player = player;
+        }
+
+        public override NodeState Execute()
+        {
+            int minScore = 1000;
+            int minIndex = -1;
+            List<int> scores = new List<int>(GameManager.GetInstance().score);
+            for (int i = 0; i < scores.Count; i++)
+            {
+                if (scores[i] < minScore)
+                {
+                    minScore = scores[i];
+                    minIndex = i;
+                }
+            }
+            if (minIndex == player.teamIndex)
+            {
+                return NodeState.Fail;
+            }
+            else
+            {
+                return NodeState.Success;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 下位是否生存
+    /// </summary>
     public class IsNextAlive : ConditionNode
     {
         private BasePlayer player;
