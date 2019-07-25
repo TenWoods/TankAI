@@ -10,6 +10,7 @@ namespace TanksMP
         private List<BasePlayer> allPlayers;
         private BasePlayer player;
         private BasePlayer target = null;
+        private BasePlayer topPlayer;
         private float attackRadius;
         private float avoidRadius;
 
@@ -122,6 +123,25 @@ namespace TanksMP
             else
             {
                 return false;
+            }
+        }
+
+        private void FindTopPlayer()
+        {
+            int maxIndex = -1;
+            int maxScore = 0;
+            List<int>scores = new List<int>(GameManager.GetInstance().score);
+            for (int i = 0; i < allPlayers.Count; i++)
+            {
+                if (scores[allPlayers[i].teamIndex] > maxScore)
+                {
+                    maxScore = scores[allPlayers[i].teamIndex];
+                    maxIndex = i;
+                }
+            }
+            if (maxIndex != -1 && maxIndex != player.teamIndex)
+            {
+                topPlayer = allPlayers[maxIndex];
             }
         }
 

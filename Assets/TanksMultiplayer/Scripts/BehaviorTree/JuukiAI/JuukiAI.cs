@@ -149,7 +149,7 @@ namespace TanksMP
             parallelNodes[2].AddNode(attackNormals[2]);
             sequenceNodes[3].AddNode(gameHalf);
             sequenceNodes[3].AddNode(selectNodes[1]);
-            parallelNodes[3].AddNode(attackLow);
+            parallelNodes[3].AddNode(attackLowerScore);
             parallelNodes[3].AddNode(attackNormals[3]);
             //第四层
             selectNodes[1].AddNode(sequenceNodes[4]);
