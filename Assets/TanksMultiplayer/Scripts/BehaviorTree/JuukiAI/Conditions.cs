@@ -31,6 +31,32 @@ namespace TanksMP
     }
 
     /// <summary>
+    /// 判断玩家是否拥有强力子弹
+    /// </summary>
+    public class HasBulletPower : ConditionNode
+    {
+        private BasePlayer player;
+        
+        public HasBulletPower(BasePlayer player)
+        {
+            this.player = player;
+        }
+
+        public override NodeState Execute()
+        {
+            if (player.currentBullet == 1)
+            {
+                return NodeState.Fail;
+            }
+            else
+            {
+                return NodeState.Success;
+            }
+        }
+
+    }
+
+    /// <summary>
     /// 判断场上是否有某种道具
     /// </summary>
     public class IsItemExist : ConditionNode
@@ -176,6 +202,78 @@ namespace TanksMP
             else
             {
                 return NodeState.Fail;
+            }
+        }
+    }
+
+    public class IsNextAlive : ConditionNode
+    {
+        private BasePlayer player;
+        private List<BasePlayer> allPlayers;
+        
+        public IsNextAlive(BasePlayer player)
+        {
+            this.player = player;
+            allPlayers = new List<BasePlayer>();
+        }
+
+        public override NodeState Execute()
+        {
+            BasePlayer nextPlayer = FindNextPlayer();
+            if (nextPlayer != null && nextPlayer.IsAlive)
+            {
+                return NodeState.Success;
+            }
+            else
+            {
+                return NodeState.Fail;
+            }
+        }
+        private BasePlayer FindNextPlayer()
+        {
+            BasePlayer nextPlayer = null;
+            FindAllPlayers();
+            int nextTeamIndex = -1;
+            int nextScore = 0;
+            List<int> scores = new List<int>(GameManager.GetInstance().score);
+            for (int i = 0; i < scores.Count; i++)
+            {
+                if (i != player.teamIndex && scores[i] > nextScore)
+                {
+                    nextScore = scores[i];
+                    nextTeamIndex = i;
+                }
+            }
+            if (scores[nextTeamIndex] > scores[player.teamIndex])
+            {
+                return null;
+            }
+            foreach (var p in allPlayers)
+            {
+                if (p.teamIndex == nextTeamIndex)
+                {
+                    nextPlayer = p;
+                    break;
+                }
+            }
+            if (nextPlayer == null)
+            {
+                return null;
+            }
+            return nextPlayer;
+        }
+
+        private void FindAllPlayers()
+        {
+            allPlayers.Clear();
+            GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+            foreach(var p in players)
+            {
+                var comp = p.GetComponent<BasePlayer>();
+                if (comp.teamIndex != player.teamIndex)
+                {
+                    allPlayers.Add(comp);
+                }
             }
         }
     }

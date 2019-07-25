@@ -17,12 +17,10 @@ namespace TanksMP
                 foreach (var pl in allplayer)
                 {
                     var comp = pl.GetComponent<BasePlayer>();
-                    if (comp.teamIndex != tankPlayer.teamIndex && comp.IsAlive)
-                    {
-                        lockPlayer = comp;
-                        break;
-                    }
+                    
+                    
                 }
+                Debug.Log(allplayer.Length);
             }
 
             if (lockPlayer != null)

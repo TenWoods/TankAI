@@ -5,35 +5,35 @@ using BehaviorTree;
 
 namespace TanksMP
 {
-    public class AttackEnemyWithLowHealth : ActionNode
+    public class NearAttack : ActionNode
     {
-        // 场上所有玩家
-        private List<BasePlayer> allPlayers;
+        private List<BasePlayer> allPlayersInRange;
         private BasePlayer player;
         private BasePlayer target = null;
+        private float attackRadius;
 
-        public AttackEnemyWithLowHealth(BasePlayer player) : base()
+        public NearAttack(BasePlayer player, float attackRadius) : base()
         {
             this.player = player;
-            allPlayers = new List<BasePlayer>();
+            this.attackRadius = attackRadius;
+            allPlayersInRange = new List<BasePlayer>();
             FindAllPlayers();
         }
 
         public override NodeState Execute()
         {
-            Debug.Log("AttackLowHealth");
+            Debug.Log("?");
             FindAllPlayers();
             NodeState result = NodeState.Fail;
             if (target == null)
             {
-                if (!FindLowHealthPlayer())
+                if (!FindTargetInRange())
                 {
                     result = NodeState.Fail;
                     return result;
                 }
             }
             result = NodeState.Success;
-            player.MoveTo(target.transform.position);
             if (player.bShootable)
             {
                 player.AimAndShoot(target.transform.position);
@@ -41,55 +41,67 @@ namespace TanksMP
             target = null;
             return result;
         }
-        
-        /// <summary>
-        /// 寻找低血量敌人中最近的
-        /// </summary>
-        /// <returns></returns>
-        private bool FindLowHealthPlayer()
+
+        private bool FindTargetInRange()
         {
-            int minIndex = -1;
+            int index = -1;
             int minHealth = 15;
             int tempHealth = 0;
-            float minDistance = 10000.0f;
-            float tempDistance = 0.0f;
-            for (int i = 0; i < allPlayers.Count; i++)
-            {
-                tempHealth = allPlayers[i].health;
-                if (tempHealth <= minHealth && tempHealth > 0)
-                {
-                    minHealth = tempHealth;
-                    tempDistance = Vector3.Magnitude(allPlayers[i].transform.position - player.transform.position);
-                    if (tempDistance < minDistance)
-                    {
-                        minDistance = tempDistance;
-                        minIndex = i;
-                    }
-                }
-            }
-            if (minIndex != -1)
-            {
-                target = allPlayers[minIndex];
-                return true;
-            }
-            else
+            if (allPlayersInRange.Count <= 0)
             {
                 return false;
             }
+            // 寻找范围内血量最少并且没有护盾的
+            for (int i = 0; i < allPlayersInRange.Count; i++)
+            {
+                tempHealth = allPlayersInRange[i].health;
+                if (allPlayersInRange[i].shield <= 0 && tempHealth < minHealth)
+                {
+                    minHealth = tempHealth;
+                    index = i;
+                }
+            }
+            // 全有护盾情况下攻击护盾最少的
+            if (index != -1)
+            {
+                target = allPlayersInRange[index];
+                return true;
+            }
+            int minShield = 15;
+            int tempShield = 0;
+            for (int i = 0; i < allPlayersInRange.Count; i++)
+            {
+                tempShield = allPlayersInRange[i].shield;
+                if (tempShield <= minShield)
+                {
+                    minShield = tempShield;
+                    index = i;
+                }
+            }
+            if (index != -1)
+            {
+                target = allPlayersInRange[index];
+                return true;
+            }
+            return false;
         }
-
+        
+        /// <summary>
+        /// 计算提前量
+        /// </summary>
+        /// <returns></returns>
         private Vector3 CalculateAttackDir()
         {
             Vector3 result;
             Vector3 targetPos = target.transform.position;
             Vector3 playerPos = player.transform.position;
-            float cosTheta = Mathf.Cos(Mathf.Deg2Rad * Vector3.Angle(player.Velocity, target.Velocity));
+            float cosTheta = Mathf.Cos(Mathf.Deg2Rad * Vector3.Angle(player.transform.forward, target.transform.forward));
             Vector3 direction = targetPos - playerPos;
             float distance = direction.magnitude;
-            float a = 1.0f - Mathf.Pow((18.0f / 8.0f), 2);
+            float a = -4.0625f;
             float b = -2.0f * distance * cosTheta;
             float c = distance * distance;
-            float delta = b * b - 4.0f * a * c;
+            float delta = Mathf.Pow(b, 2) - 4.0f * a * c;
             if (delta < 0)
             {   
                 result = target.transform.position;
@@ -100,25 +112,28 @@ namespace TanksMP
                 float x1 = (-b + sqrtDelta) / (2.0f * a);
                 float x2 = (-b - sqrtDelta) / (2.0f * a);
                 float x = Mathf.Min(x1, x2);
-                result = targetPos + Vector3.Normalize(target.Velocity) * x;
+                result = targetPos + Vector3.Normalize(target.transform.forward) * x;
             }
             return result;
         }
 
-        // 找到除自己之外所有的玩家
         private void FindAllPlayers()
         {
-            allPlayers.Clear();
+            allPlayersInRange.Clear();
             GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+            float distance = 0;
             foreach(var p in players)
             {
                 var comp = p.GetComponent<BasePlayer>();
                 if (comp.teamIndex != player.teamIndex)
                 {
-                    allPlayers.Add(comp);
+                    distance = Vector3.Magnitude(comp.transform.position - player.transform.position);
+                    if (distance <= attackRadius)
+                    {
+                        allPlayersInRange.Add(comp);
+                    }
                 }
             }
         }
     }   
 }
-

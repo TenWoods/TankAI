@@ -13,16 +13,17 @@ namespace TanksMP
         private GameObject target = null;
         private BasePlayer player;
         // 场上所有目标道具
-        List<GameObject> allItems;
+        private List<GameObject> allItems;
         // 目标关键字
-        string keyword;
+        private string keyword;
+        private float avoidRadius; 
 
-
-        public GetItem(BasePlayer player, string keyword) : base()
+        public GetItem(BasePlayer player, string keyword, float avoidRadius) : base()
         {
             this.player = player;
             this.keyword = keyword;
             allItems = new List<GameObject>();
+            this.avoidRadius = avoidRadius;
             FindAllItems();
         }
 
@@ -47,8 +48,8 @@ namespace TanksMP
             }
             if (Vector3.Magnitude(player.transform.position - target.transform.position) >= 1.0f)
             {
-                result = NodeState.Running;
-                player.MoveTo(target.transform.position);
+                result = NodeState.Success;
+                Move();
                 return result;
             }
             if (!target.activeInHierarchy)
@@ -65,6 +66,53 @@ namespace TanksMP
             }
         }
         
+        private void Move()
+        {
+            GameObject bullet = null;
+            Vector3 direction = Vector3.zero;
+            bullet = FindBulletAround();
+            if (bullet == null)
+            {
+                player.MoveTo(target.transform.position);
+                return;
+            }
+            Vector3 bulletDir = Vector3.Normalize(bullet.GetComponent<Rigidbody>().velocity);
+            direction = Quaternion.AngleAxis(90, Vector3.up) * bulletDir;
+            for (int i = 0; i < 5; i++)
+            {
+                player.SimpleMove(new Vector2(direction.x, direction.z));
+            }
+            Debug.Log("Avoid");
+        }
+
+        /// <summary>
+        /// 探测附近子弹
+        /// </summary>
+        /// <returns></returns>
+        private GameObject FindBulletAround()
+        {
+            GameObject bullet = null;
+            GameObject[] bullets = GameObject.FindGameObjectsWithTag("Bullet");
+            for (int i = 0; i < bullets.Length; i++)
+            {
+                if (bullets[i].GetComponent<Bullet>().owner.GetComponent<BasePlayer>().teamIndex == player.teamIndex)
+                {
+                    continue;
+                }
+                if (Vector3.Magnitude(bullets[i].transform.position - player.transform.position) <= avoidRadius)
+                {
+                    Vector3 bulletDir = Vector3.Normalize(bullets[i].GetComponent<Rigidbody>().velocity);
+                    float angle = Vector3.Angle(Vector3.Normalize(player.transform.forward), bulletDir);
+                    if (angle < 45.0f || angle > 135.0f)
+                    {
+                        bullet = bullets[i];
+                        return bullet;
+                    }
+                }
+            }
+            return bullet;
+        }
+
         /// <summary>
         /// 寻找离自己最近的道具
         /// </summary>
