@@ -77,11 +77,16 @@ namespace TanksMP
                 return;
             }
             Vector3 bulletDir = Vector3.Normalize(bullet.GetComponent<Rigidbody>().velocity);
-            direction = Quaternion.AngleAxis(90, Vector3.up) * bulletDir;
-            for (int i = 0; i < 5; i++)
+            float r = Random.Range(-1, 1);
+            if (r <= 0)
             {
-                player.SimpleMove(new Vector2(direction.x, direction.z));
+                direction = Quaternion.AngleAxis(-90, Vector3.up) * bulletDir;
             }
+            else
+            {
+                direction = Quaternion.AngleAxis(-90, Vector3.up) * bulletDir;
+            }
+            player.SimpleMove(new Vector2(direction.x, direction.z));
             Debug.Log("Avoid");
         }
 
@@ -93,26 +98,31 @@ namespace TanksMP
         {
             GameObject bullet = null;
             GameObject[] bullets = GameObject.FindGameObjectsWithTag("Bullet");
+            int minIndex = -1;
+            float minDistance = 10000.0f;
+            float distance = 0;
             for (int i = 0; i < bullets.Length; i++)
             {
                 if (bullets[i].GetComponent<Bullet>().owner.GetComponent<BasePlayer>().teamIndex == player.teamIndex)
                 {
                     continue;
                 }
-                if (Vector3.Magnitude(bullets[i].transform.position - player.transform.position) <= avoidRadius)
+                distance = Vector3.Magnitude(bullets[i].transform.position - player.transform.position);
+                if (distance <= avoidRadius)
                 {
-                    Vector3 bulletDir = Vector3.Normalize(bullets[i].GetComponent<Rigidbody>().velocity);
-                    float angle = Vector3.Angle(Vector3.Normalize(player.transform.forward), bulletDir);
-                    if (angle < 45.0f || angle > 135.0f)
+                    if (distance < minDistance)
                     {
-                        bullet = bullets[i];
-                        return bullet;
+                        minDistance = distance;
+                        minIndex = i;
                     }
                 }
             }
+            if (minIndex != -1)
+            {
+                bullet = bullets[minIndex];
+            }
             return bullet;
         }
-
         /// <summary>
         /// 寻找离自己最近的道具
         /// </summary>

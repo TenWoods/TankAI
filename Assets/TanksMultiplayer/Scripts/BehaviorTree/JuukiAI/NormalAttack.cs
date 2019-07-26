@@ -36,7 +36,7 @@ namespace TanksMP
             result = NodeState.Success;
             if (player.bShootable)
             {
-                player.AimAndShoot(target.transform.position);
+                player.AimAndShoot(CalculateAttackDir());
             }
             target = null;
             return result;
@@ -112,7 +112,14 @@ namespace TanksMP
                 float x1 = (-b + sqrtDelta) / (2.0f * a);
                 float x2 = (-b - sqrtDelta) / (2.0f * a);
                 float x = Mathf.Min(x1, x2);
-                result = targetPos + Vector3.Normalize(target.transform.forward) * x;
+                if (x <= 0)
+                {
+                    result = target.transform.position;
+                }
+                else
+                {
+                    result = targetPos + Vector3.Normalize(target.transform.forward) * x;
+                }
             }
             return result;
         }

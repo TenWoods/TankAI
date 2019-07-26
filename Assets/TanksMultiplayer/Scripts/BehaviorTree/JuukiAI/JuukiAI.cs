@@ -9,9 +9,9 @@ namespace TanksMP
     public class JuukiAI : BaseControl
     {
         // 攻击范围(避免特殊子弹浪费)
-        private float attackRadius = 12.0f;
+        private float attackRadius = 15.0f;
         // 子弹躲避范围
-        private float avoidRadius = 5.0f;
+        private float avoidRadius = 4.0f;
         // 根节点
         private SelectNode rootNode;
         // 拾取生命动作

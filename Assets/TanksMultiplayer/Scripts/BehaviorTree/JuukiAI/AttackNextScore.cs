@@ -40,7 +40,7 @@ namespace TanksMP
             Move();
             if (player.bShootable && Vector3.Magnitude(nextPlayer.transform.position - player.transform.position) < attackRadius)
             {
-                player.AimAndShoot(nextPlayer.transform.position);
+                player.AimAndShoot(CalculateAttackDir());
             }
             nextPlayer = null;
             return result;
@@ -57,7 +57,15 @@ namespace TanksMP
                 return;
             }
             Vector3 bulletDir = Vector3.Normalize(bullet.GetComponent<Rigidbody>().velocity);
-            direction = Quaternion.AngleAxis(90, Vector3.up) * bulletDir;
+            float r = Random.Range(-1, 1);
+            if (r <= 0)
+            {
+                direction = Quaternion.AngleAxis(-90, Vector3.up) * bulletDir;
+            }
+            else
+            {
+                direction = Quaternion.AngleAxis(-90, Vector3.up) * bulletDir;
+            }
             player.SimpleMove(new Vector2(direction.x, direction.z));
             Debug.Log("Avoid");
         }
@@ -107,7 +115,7 @@ namespace TanksMP
             List<int> scores = new List<int>(GameManager.GetInstance().score);
             for (int i = 0; i < scores.Count; i++)
             {
-                if (i != player.teamIndex && scores[i] > nextScore)
+                if (i != player.teamIndex && scores[i] > nextScore && allPlayers[i].shield <= 0)
                 {
                     nextScore = scores[i];
                     nextTeamIndex = i;
@@ -158,7 +166,14 @@ namespace TanksMP
                 float x1 = (-b + sqrtDelta) / (2.0f * a);
                 float x2 = (-b - sqrtDelta) / (2.0f * a);
                 float x = Mathf.Min(x1, x2);
-                result = targetPos + Vector3.Normalize(nextPlayer.transform.forward) * x;
+                if (x <= 0)
+                {
+                    result = nextPlayer.transform.position;
+                }
+                else
+                {
+                    result = targetPos + Vector3.Normalize(nextPlayer.transform.forward) * x;
+                }
             }
             return result;
         }

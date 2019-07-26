@@ -57,7 +57,15 @@ namespace TanksMP
                 return;
             }
             Vector3 bulletDir = Vector3.Normalize(bullet.GetComponent<Rigidbody>().velocity);
-            direction = Quaternion.AngleAxis(90, Vector3.up) * bulletDir;
+            float r = Random.Range(-1, 1);
+            if (r <= 0)
+            {
+                direction = Quaternion.AngleAxis(-90, Vector3.up) * bulletDir;
+            }
+            else
+            {
+                direction = Quaternion.AngleAxis(-90, Vector3.up) * bulletDir;
+            }
             player.SimpleMove(new Vector2(direction.x, direction.z));
             Debug.Log("Avoid");
         }
@@ -109,7 +117,7 @@ namespace TanksMP
             for (int i = 0; i < allPlayers.Count; i++)
             {
                 tempHealth = allPlayers[i].health;
-                if (tempHealth <= minHealth && tempHealth > 0 && lowerIndex.Contains(allPlayers[i].teamIndex))
+                if (tempHealth <= minHealth && tempHealth > 0 && allPlayers[i].shield <= 0 && lowerIndex.Contains(allPlayers[i].teamIndex))
                 {
                     minHealth = tempHealth;
                     minIndex = i;
@@ -171,7 +179,14 @@ namespace TanksMP
                 float x1 = (-b + sqrtDelta) / (2.0f * a);
                 float x2 = (-b - sqrtDelta) / (2.0f * a);
                 float x = Mathf.Max(x1, x2);
-                result = targetPos + Vector3.Normalize(target.transform.forward) * x;
+                if (x <= 0)
+                {
+                    result = target.transform.position;
+                }
+                else
+                {
+                    result = targetPos + Vector3.Normalize(target.transform.forward) * x;
+                }
             }
             return result;
         }
